@@ -1,153 +1,85 @@
-
-
-
 #include <Wire.h>
-
-#include <LiquidCrystal_I2C.h> //从库管理器添加1602I2C库
-
+#include <LiquidCrystal_I2C.h> //Add the 1602I2C library from the library manager
 #include <SPI.h>
+#define LOG_PERIOD 15000
+#define MAX_PERIOD 60000
 
-#define LOG_PERIOD 15000  
-#define MAX_PERIOD 60000  
-
- 
-
-unsigned long counts;     // GM 变量
-
-unsigned long cpm;        // CPM 变量
-
-unsigned int multiplier;  //设置换算变量
-
-unsigned long previousMillis;  //测量时间
-
+unsigned long counts; // GM variable
+unsigned long cpm; // CPM variable
+unsigned int multiplier; //Set conversion variables
+unsigned long previousMillis; //measure time
 float usv;
 
- 
+LiquidCrystal_I2C lcd(0x27, 16, 2); //Set the LCD address to 0x27 (1602 monitor)
 
-LiquidCrystal_I2C lcd(0x27, 16, 2); //设置LCD地址为 0x27 （1602显示器）
-
- 
-
-void tube_impulse() {      //自加
-
-  counts++;
-
+void tube_impulse() { //Self-increasing
+   counts++;
+   digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
+   delay(50); //This could be better implemented...
+   digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW 
 }
-
- 
 
 void setup()
-
 {
-
-  counts = 0;
-
-  cpm = 0;    //计数
-
-  multiplier = MAX_PERIOD / LOG_PERIOD;      //计算乘数，取决于周期
-
-  //Serial.begin(9600);
-
-  attachInterrupt(0, tube_impulse, FALLING); //中断为下降沿触发
-
+   counts = 0;
+   cpm = 0; //count
+   multiplier = MAX_PERIOD / LOG_PERIOD; //Calculate multiplier, depends on the period
+   Serial.begin(9600);
+   attachInterrupt(0, tube_impulse, FALLING); //Interrupt is triggered by falling edge
  
-
-  //////////////////
-
-  lcd.init();                     
-
+   ///////////////////
+   lcd.init();
+   // LEDInit
+   pinMode(LED_BUILTIN, OUTPUT);
  
-
-  // 输出数据到屏幕
-
-  lcd.backlight();
-
-  lcd.setCursor(5, 0);
-
-  lcd.print("Boot...");  //写一个开机boot加载的画面，提供一个盖革管启动的时间。
-
+   // Output data to the screen
+   lcd.backlight();
+   lcd.setCursor(3, 0);
+   lcd.print("Rawr... x3"); //Write a boot loading screen and provide a Geiger tube startup time.
    lcd.setCursor(0, 1);
-
-  for(int i=0;i<16;i++)
-
-  {
-
-  lcd.write(0xff);
-
-  delay(250);
-
-  }
-
+   for(int i=0;i<15;i++)
+   {
+   lcd.write(0xff);
+   delay(1000);
+   }
 }
-
  
-
 void loop()
-
 {
+   unsigned long currentMillis = millis();
+   if (currentMillis - previousMillis > LOG_PERIOD) {
+     previousMillis = currentMillis;
+     cpm = counts * multiplier;//Get the technical times
+     Serial.println(counts*4); //Print to serial
+     usv = float(cpm) / 151;//Introduce the formula to calculate the radiation intensity
 
-  unsigned long currentMillis = millis();
+     lcd.clear();
+     lcd.print("CPM:");
+     lcd.print(cpm);//Output cpm value
+     lcd.setCursor(0, 1);//Second line
+     lcd.print(usv);
+     lcd.print(" uSv/h");//Output intensity value
+     counts = 0;//reset
 
-  if (currentMillis - previousMillis > LOG_PERIOD) {
+     if (usv >= 10)
+     {
+       lcd.setCursor(9, 0);
+       lcd.print("GTFO!!!");//If the radiation is greater than 10, the "Danger" text is displayed
+       delay(0.1);
+     }
 
-    previousMillis = currentMillis;
+     else if (usv < 10 && usv >= 0.52)
+       {
+         lcd.setCursor(9, 0);
+         lcd.print("Unsafe");//Display "Unsafe" Text between 0.52-10
+         delay(0.1);
+       }
 
-    cpm = counts * multiplier;//得出技术次数
-
-    usv = float(cpm) / 151;//带入公式计算出辐射强度
-
-    lcd.clear();
-
-    lcd.print("CPM=");
-
-    lcd.print(cpm);//输出cpm值
-
-    lcd.setCursor(0, 1);//第二行
-
-    lcd.print(usv);
-
-    lcd.print(" uSv/h");//输出强度值
-
-    counts = 0;//复位
-
-    if (usv >= 10)
-
-    {
-
-      lcd.setCursor(9, 0);
-
-      lcd.print("Danger!");//如果辐射大于10则显示危险
-
-      delay(0.1);
-
-    }
-
-    else if (usv < 10 && usv >= 0.52)
-
-      {
-
-        lcd.setCursor(10, 0);
-
-        lcd.print("Unsafe");//在0.52-10这个范围显示不安全
-
-        delay(0.1);
-
-      }
-
-      else if (usv < 0.52)
-
-        {
-
-          lcd.setCursor(10, 0);
-
-          lcd.print("Safety");//在这个值以下显示安全
-
-          delay(0.1);
-
-        }
-
-      }
-
- 
-
+       else if (usv < 0.52)
+         {
+           lcd.setCursor(9, 0);
+           lcd.print("Safe :3");//Display a "Safe" text under .52
+           delay(0.1);
+         }
+       }
 }

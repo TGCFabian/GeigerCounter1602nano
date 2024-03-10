@@ -1,3 +1,11 @@
+# Edited branch
+Contains some small personal edits, such as adding the LED flash on pin13,
+And the serial outputting of the device (which wasnt by default)
+
+Simple, yet effective, and thats what matters ^^
+
+Original Repo: https://github.com/2969773606/GeigerCounter1602nano
+Original readme below
 # GeigerCounter1602nano
 Model：GC-1602-NANO
 
@@ -10,6 +18,6 @@ Supports most of the Geiger tube: M4011, STS-5, SBM20, J305, etc. (the 330~600V 
 supported).Support the computer (PC) data acquisition, Matlab analysis and processing.
 This kit could be gotten on aliexpress and ebay:DIY Geiger Counter Kit Module Nuclear Radiation Detector with LCD Display 
 
- ![image](https://github.com/2969773606/GeigerCounter1602nano/blob/master/materials/gmv1.2_1.jpg)
- ![image](https://github.com/2969773606/GeigerCounter1602nano/blob/master/materials/gmv12_2.jpg)
- ![image](https://github.com/2969773606/GeigerCounter1602nano/blob/master/materials/gmv12_3.jpg)
+ ![image](https://github.com/TGCFabian/GeigerCounter1602nano/blob/master/materials/gmv1.2_1.jpg)
+ ![image](https://github.com/TGCFabian/GeigerCounter1602nano/blob/master/materials/gmv12_2.jpg)
+ ![image](https://github.com/TGCFabian/GeigerCounter1602nano/blob/master/materials/gmv12_3.jpg)
